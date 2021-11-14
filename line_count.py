@@ -11,28 +11,27 @@ path = setup["path"]
 fmt = setup["fmt"]
 start = datetime.strptime(setup["start"], fmt)
 end = datetime.strptime(setup["end"], fmt)
-delta = relativedelta(**setup["delta"])
+delta = setup["delta"]
 name = setup["name"]
 text = setup["text"]
+excel_fmt=setup["excel_fmt"]
 
-chat = line.Chat.read(path).select(start, end, name, text)
-time = start
+chat = line.Chat.read(path).select(start, end, name, text).message
+chat["time"] = chat["time"].dt.floor(freq=delta)
+G = chat.groupby("time")
 L = list()
-while start <= time < end:
-    count = chat.select(time, time + delta).message["name"].value_counts()
-    count.name = time
-    L.append(count)
-    time += delta
-df = pd.concat(L, axis=1)
-df = df.fillna(0)
-df = df.astype(int)
+for time, df in G:
+    s = df["name"].value_counts()
+    s.name = time
+    L.append(s)
+df = pd.concat(L, axis=1).fillna(0).astype(int)
 df = df.rename_axis("Name")
 df.insert(0, "Total", df.sum(axis=1))
 df = df.append(df.sum(axis=0).rename("Total"))
 df = df.sort_values("Total", ascending=False)
 df.insert(0, "Rank", range(len(df)))
 
-with pd.ExcelWriter("result_count.xlsx", engine="xlsxwriter", datetime_format="m/d") as writer:
+with pd.ExcelWriter("result_count.xlsx", engine="xlsxwriter", datetime_format=excel_fmt) as writer:
     df.to_excel(writer)
     wb = writer.book
     ws = wb.worksheets()[0]

@@ -2,8 +2,15 @@
     "path": "[LINE] ******的聊天記錄.txt",
     "start": "2021-1-1",
     "end": "2021-2-1",
-    "fmt":"%Y-%m-%d",
-    "delta":{"days":1, "hours":0, "months":0},
-    "name":["A", "B"],
-    "text":["Meow", "^09\\d{8}$"]
+    "fmt": "%Y-%m-%d",
+    "delta": "D",
+    "name": [
+        "A",
+        "B"
+    ],
+    "text": [
+        "Meow",
+        "^09\\d{8}$"
+    ],
+    "excel_fmt": "m/d"
 }
